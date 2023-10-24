@@ -29,7 +29,8 @@ class ErrorBoundary extends React.Component {
     }
 }
 const Home = () => {
-    const userData = JSON.parse(localStorage.getItem("user"));
+    const userData = useSelector((state) => state.user);
+    console.log(userData);
     const dispatch = useDispatch();
     const allData = useSelector((state) => state.pdf);
     const [selectedPdf, setSelectedPdf] = useState(null);
@@ -37,8 +38,8 @@ const Home = () => {
     const [selectedPages, setSelectedPages] = useState([]);
     const navigate = useNavigate();
     const [numPages, setNumPages] = useState(null);
-    const myFilterData = allData?.pdfList.filter((doc) => doc?.allDocuments?.id === userData?.user?.id);
-    const allPdfFilterData = allData?.pdfList.filter((doc) => doc?.allDocuments?.id !== userData?.user?.id);
+    const myFilterData = allData?.pdfList.filter((doc) => doc?.allDocuments?.id === userData?.id);
+    const allPdfFilterData = allData?.pdfList.filter((doc) => doc?.allDocuments?.id !== userData?.id);
     const handleUpload = () => {
         navigate("/upload");
     }
@@ -93,7 +94,7 @@ const Home = () => {
     };
 
     const handleGenerateNewPdf = async () => {
-        const id = userData?.user?.id
+        const id = userData?.id
         let arrayBuffer
         if (id === selectedPdf?.allDocuments?.id) {
             arrayBuffer = selectedPdf?.allDocuments?.pdf?.data;
@@ -291,13 +292,21 @@ const Home = () => {
                                     </div>
                                 </>
                                 :
-                                allPdfFilterData?.map((doc, index) => (
-                                    <div key={index} onClick={() => handleAllPdfCardClick(doc)}>
-                                        <PdfCard
-                                            name={doc?.allDocuments?.name}
-                                        />
-                                    </div>
-                                ))
+                                (
+                                    allPdfFilterData.length !== 0 ?
+                                        (allPdfFilterData?.map((doc, index) => (
+                                            <div key={index} onClick={() => handlePdfCardClick(doc)}>
+                                                <PdfCard
+                                                    name={doc?.allDocuments?.name}
+                                                />
+                                            </div>
+                                        ))
+                                        ) : (
+                                            <div className='flex items-center m-auto gap-4'>
+                                                <p className='text-2xl font-bold'>Plz Add PDF...</p>
+                                            </div>
+                                        )
+                                )
                             }
                         </div>
                     </div>

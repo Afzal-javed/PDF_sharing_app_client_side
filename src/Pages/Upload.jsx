@@ -7,7 +7,6 @@ import { toast } from 'react-hot-toast';
 const Upload = () => {
     const [file, setFile] = useState(null);
     const userData = useSelector((state) => state.user)
-    const dispatch = useDispatch();
     const [name, setName] = useState("");
     const [base64String, setBase64String] = useState('');
     const handleFileChange = (e) => {

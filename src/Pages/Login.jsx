@@ -17,9 +17,10 @@ const Login = () => {
         e.preventDefault();
         try {
             const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/login`, data);
+
             if (res?.status === 200) {
                 localStorage.setItem("user", JSON.stringify(res?.data));
-                dispatch(loginRedux({ user: { id: res?.data?.user?.id, email: res?.data?.user?.email, name: res?.data?.user?.name } }));
+                dispatch(loginRedux({ user: { id: res?.data?.user?.id, email: res?.data?.user?.email, name: res?.data?.user?.name }, token: res?.data?.token }));
                 navigate("/");
             }
         } catch (error) {

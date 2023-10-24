@@ -3,7 +3,8 @@ import { toast } from "react-hot-toast";
 const initialState = {
     id: "",
     email: "",
-    name: ""
+    name: "",
+    token: ""
 }
 const userSlice = createSlice({
     name: "user",
@@ -13,6 +14,7 @@ const userSlice = createSlice({
             state.id = action.payload.user.id;
             state.email = action.payload.user.email;
             state.name = action.payload.user.name;
+            state.token = action.payload.token;
             toast("User Logged In Successfully");
         },
         logoutRedux: (state, action) => {

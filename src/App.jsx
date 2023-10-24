@@ -7,8 +7,9 @@ import Login from './Pages/Login';
 import Signin from './Pages/Signin';
 import PageNotFound from './Pages/PageNotFound';
 import { Toaster } from "react-hot-toast";
+import { useSelector } from 'react-redux';
 function Layout() {
-  const userData = JSON.parse(localStorage.getItem("user"));
+  const userData = useSelector((state) => state.user)
   const location = useLocation();
   return userData?.token ? (
     <Outlet />
