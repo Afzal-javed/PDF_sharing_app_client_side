@@ -9,20 +9,39 @@ export const pdfSlice = createSlice({
     initialState,
     reducers: {
         setPdfData: (state, action) => {
-            const newData = action.payload;
-            // Check if the PDF already exists in the state
-            const existingPdfIndex = state.pdfList.findIndex(pdf => pdf.allDocuments.pdfId === newData.allDocuments.pdfId);
-            if (existingPdfIndex !== -1) {
-                // If it exists, update it
-                state.pdfList[existingPdfIndex] = newData;
+            const newDataArray = action.payload;
+
+            if (Array.isArray(newDataArray)) {
+                newDataArray.forEach(newData => {
+                    if (Array.isArray(newData)) {
+                        newData.forEach(innerData => {
+                            const existingPdfIndex = state.pdfList.findIndex(pdf => pdf.pdfId === innerData.pdfId);
+                            if (existingPdfIndex !== -1) {
+                                state.pdfList[existingPdfIndex] = innerData;
+                            } else {
+                                state.pdfList.push(innerData);
+                            }
+                        });
+                    } else {
+                        const existingPdfIndex = state.pdfList.findIndex(pdf => pdf.pdfId === newData.pdfId);
+                        if (existingPdfIndex !== -1) {
+                            state.pdfList[existingPdfIndex] = newData;
+                        } else {
+                            state.pdfList.push(newData);
+                        }
+                    }
+                });
             } else {
-                // If it doesn't exist, add it
-                state.pdfList.push(newData);
+                console.error('Error: Invalid data format for setPdfData. Expected an array.');
             }
         },
+
+
+
+
         removeDeletedPdf: (state, action) => {
             const deletedPdfId = action.payload;
-            state.pdfList = state.pdfList.filter(pdf => pdf.allDocuments.pdfId !== deletedPdfId);
+            state.pdfList = state.pdfList.filter(pdf => pdf.pdfId !== deletedPdfId);
         }
     }
 })

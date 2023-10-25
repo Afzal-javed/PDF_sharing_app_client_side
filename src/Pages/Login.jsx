@@ -2,11 +2,11 @@ import axios from 'axios';
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { loginRedux } from "../redux/userSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import toast from 'react-hot-toast';
 
 const Login = () => {
-    const userData = JSON.parse(localStorage.getItem("user"));
+    const userData = useSelector((state) => state.user);
     const [data, setData] = useState({
         email: userData?.user?.email || "",
         password: ""
@@ -19,7 +19,6 @@ const Login = () => {
             const res = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/login`, data);
 
             if (res?.status === 200) {
-                localStorage.setItem("user", JSON.stringify(res?.data));
                 dispatch(loginRedux({ user: { id: res?.data?.user?.id, email: res?.data?.user?.email, name: res?.data?.user?.name }, token: res?.data?.token }));
                 navigate("/");
             }

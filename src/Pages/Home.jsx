@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { json, useNavigate } from 'react-router-dom'
 import PdfCard from '../Component/PdfCard';
 import Header from '../Component/Header';
 import { setPdfData, removeDeletedPdf } from "../redux/pdfSlice";
@@ -30,7 +30,6 @@ class ErrorBoundary extends React.Component {
 }
 const Home = () => {
     const userData = useSelector((state) => state.user);
-    console.log(userData);
     const dispatch = useDispatch();
     const allData = useSelector((state) => state.pdf);
     const [selectedPdf, setSelectedPdf] = useState(null);
@@ -38,8 +37,8 @@ const Home = () => {
     const [selectedPages, setSelectedPages] = useState([]);
     const navigate = useNavigate();
     const [numPages, setNumPages] = useState(null);
-    const myFilterData = allData?.pdfList.filter((doc) => doc?.allDocuments?.id === userData?.id);
-    const allPdfFilterData = allData?.pdfList.filter((doc) => doc?.allDocuments?.id !== userData?.id);
+    const myFilterData = allData?.pdfList.filter((doc) => doc?.id === userData?.id);
+    const allPdfFilterData = allData?.pdfList.filter((doc) => doc?.id !== userData?.id);
     const handleUpload = () => {
         navigate("/upload");
     }
@@ -92,14 +91,13 @@ const Home = () => {
             </div>
         ));
     };
-
     const handleGenerateNewPdf = async () => {
         const id = userData?.id
         let arrayBuffer
-        if (id === selectedPdf?.allDocuments?.id) {
-            arrayBuffer = selectedPdf?.allDocuments?.pdf?.data;
+        if (id === selectedPdf?.id) {
+            arrayBuffer = selectedPdf?.pdf?.data;
         } else {
-            arrayBuffer = selectedAllPdf?.allDocuments?.pdf?.data
+            arrayBuffer = selectedAllPdf?.pdf?.data
         }
         const existingPdfBytes = new Uint8Array(arrayBuffer);
         if (!existingPdfBytes || !(existingPdfBytes instanceof Uint8Array)) {
@@ -139,7 +137,7 @@ const Home = () => {
         setSelectedAllPdf(pdfData);
     }
     const handleDeletePdf = async () => {
-        const id = selectedPdf?.allDocuments?.pdfId
+        const id = selectedPdf?.pdfId
         try {
             const res = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/api/pdf/delete/${id}`)
             if (res.status === 200) {
@@ -155,25 +153,25 @@ const Home = () => {
     }
     const handleDownload = () => {
         if (selectedPdf) {
-            const byteArray = new Uint8Array(selectedPdf.allDocuments.pdf.data)
+            const byteArray = new Uint8Array(selectedPdf.pdf.data)
             const base64Data = btoa(String.fromCharCode.apply(null, byteArray));
             const blob = b64toBlob(base64Data, 'application/pdf');
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${selectedPdf.allDocuments.name}.pdf`;
+            a.download = `${selectedPdf.name}.pdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         } else {
-            const byteArray = new Uint8Array(selectedAllPdf.allDocuments.pdf.data)
+            const byteArray = new Uint8Array(selectedAllPdf.pdf.data)
             const base64Data = btoa(String.fromCharCode.apply(null, byteArray));
             const blob = b64toBlob(base64Data, 'application/pdf');
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${selectedAllPdf.allDocuments.name}.pdf`;
+            a.download = `${selectedAllPdf.name}.pdf`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -211,7 +209,7 @@ const Home = () => {
                                             myFilterData?.map((doc, index) => (
                                                 <div key={index} onClick={() => handlePdfCardClick(doc)}>
                                                     <PdfCard
-                                                        name={doc?.allDocuments?.name}
+                                                        name={doc?.name}
 
                                                     />
                                                 </div>
@@ -221,12 +219,12 @@ const Home = () => {
                                     <div className='w-full md:w-[50%]'>
                                         <div className='flex items-center justify-between mb-2'>
                                             <span className='text-3xl cursor-pointer' onClick={() => setSelectedPdf(null)}><BsFillArrowLeftCircleFill /></span>
-                                            <p className='text-lg font-semibold text-center mr-6'>{selectedPdf?.allDocuments?.name}</p>
+                                            <p className='text-lg font-semibold text-center mr-6'>{selectedPdf?.name}</p>
                                             <button className='text-lg font-semibold text-white bg-red-800 w-1/2 rounded-full hover:bg-red-900 p-1.5 ' onClick={handleDownload}>Download Now</button>
                                             <span className='text-4xl cursor-pointer hover:text-red-800' onClick={handleDeletePdf}><AiFillDelete /></span>
                                         </div>
                                         <Document className='overflow-hidden overflow-x-scroll flex gap-3'
-                                            file={{ data: selectedPdf?.allDocuments?.pdf?.data }}
+                                            file={{ data: selectedPdf?.pdf?.data }}
                                             onLoadSuccess={onDocumentLoadSuccess}
                                         >
                                             {renderPages()}
@@ -242,7 +240,7 @@ const Home = () => {
                                         (myFilterData?.map((doc, index) => (
                                             <div key={index} onClick={() => handlePdfCardClick(doc)}>
                                                 <PdfCard
-                                                    name={doc?.allDocuments?.name}
+                                                    name={doc?.name}
                                                 />
                                             </div>
                                         ))
@@ -268,7 +266,7 @@ const Home = () => {
                                             allPdfFilterData?.map((doc, index) => (
                                                 <div key={index} onClick={() => handleAllPdfCardClick(doc)}>
                                                     <PdfCard
-                                                        name={doc?.allDocuments?.name}
+                                                        name={doc?.name}
                                                     />
                                                 </div>
                                             ))
@@ -278,10 +276,10 @@ const Home = () => {
                                         <div className='flex items-center justify-between mb-2'>
                                             <span className='text-3xl cursor-pointer' onClick={() => setSelectedAllPdf(null)}><BsFillArrowLeftCircleFill /></span>
                                             <button className='text-lg font-semibold text-white bg-red-800 w-1/2 rounded-full hover:bg-red-900 p-1.5 ' onClick={handleDownload}>Download Now</button>
-                                            <p className='text-lg font-semibold text-center mr-6'>{selectedAllPdf?.allDocuments?.name}</p>
+                                            <p className='text-lg font-semibold text-center mr-6'>{selectedAllPdf?.name}</p>
                                         </div>
                                         <Document className='w-full overflow-hidden overflow-x-scroll flex gap-3'
-                                            file={{ data: selectedAllPdf?.allDocuments?.pdf?.data }}
+                                            file={{ data: selectedAllPdf?.pdf?.data }}
                                             onLoadSuccess={onDocumentLoadSuccess}
                                         >
                                             {renderPages()}
@@ -295,9 +293,9 @@ const Home = () => {
                                 (
                                     allPdfFilterData.length !== 0 ?
                                         (allPdfFilterData?.map((doc, index) => (
-                                            <div key={index} onClick={() => handlePdfCardClick(doc)}>
+                                            <div key={index} onClick={() => handleAllPdfCardClick(doc)}>
                                                 <PdfCard
-                                                    name={doc?.allDocuments?.name}
+                                                    name={doc?.name}
                                                 />
                                             </div>
                                         ))
